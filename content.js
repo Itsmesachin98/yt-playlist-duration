@@ -1,3 +1,24 @@
+function createDurationBanner(formatted, videoCount) {
+    if (document.getElementById("yt-duration-banner")) {
+        document.getElementById("yt-duration-banner").remove();
+    }
+
+    const ytDurationBanner = document.createElement("div");
+    ytDurationBanner.id = "yt-duration-banner";
+
+    const totalDuration = document.createElement("p");
+    totalDuration.id = "total-duration";
+    totalDuration.innerHTML = `Total Playlist Duration: <span id="duration-value">${formatted}</span>`;
+
+    const videosCounted = document.createElement("p");
+    videosCounted.id = "videos-counted";
+    videosCounted.innerHTML = `Videos Counted: <span id="videos-counted-value">${videoCount}</span>`;
+
+    ytDurationBanner.appendChild(totalDuration);
+    ytDurationBanner.appendChild(videosCounted);
+    document.body.appendChild(ytDurationBanner);
+}
+
 function parseDuration(durationText) {
     const parts = durationText.split(":").map(Number).reverse();
     let seconds = 0;
@@ -8,16 +29,22 @@ function parseDuration(durationText) {
 }
 
 function formatDuration(totalSeconds) {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours}h ${minutes}m ${seconds}s`;
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.floor((totalSeconds % 3600) / 60);
+    let seconds = totalSeconds % 60;
+
+    hours = hours < 10 ? "0" + hours : hours;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    return `${hours}:${minutes}:${seconds}`;
 }
 
 function calculateTotalDuration() {
     const durationElements = document.querySelectorAll(
         ".badge-shape-wiz__text"
     );
+
     let total = 0;
 
     durationElements.forEach((el) => {
@@ -29,14 +56,8 @@ function calculateTotalDuration() {
 
     const formatted = formatDuration(total);
 
-    if (document.getElementById("yt-duration-banner")) {
-        document.getElementById("yt-duration-banner").remove();
-    }
-
-    const display = document.createElement("div");
-    display.id = "yt-duration-banner";
-    display.innerText = `Total Playlist Duration: ${formatted}`;
-    document.body.appendChild(display);
+    // Use the new function to create and append the banner
+    createDurationBanner(formatted, durationElements.length);
 }
 
 window.addEventListener("load", () => {
