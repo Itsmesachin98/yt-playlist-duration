@@ -101,7 +101,7 @@ async function scrollToLoadAllVideos() {
         let sameCount = 0;
 
         const interval = setInterval(() => {
-            window.scrollBy(0, 1000); // scroll down
+            window.scrollBy(0, 5000);
 
             const scrollTop =
                 document.documentElement.scrollTop || document.body.scrollTop;
