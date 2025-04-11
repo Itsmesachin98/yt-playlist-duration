@@ -1,3 +1,37 @@
+const dragElement = (element) => {
+    let offsetX = 0,
+        offsetY = 0,
+        startX = 0,
+        startY = 0;
+
+    const mouseDownHandler = (e) => {
+        e.preventDefault();
+        startX = e.clientX;
+        startY = e.clientY;
+
+        document.addEventListener("mousemove", mouseMoveHandler);
+        document.addEventListener("mouseup", mouseUpHandler);
+    };
+
+    const mouseMoveHandler = (e) => {
+        offsetX = e.clientX - startX;
+        offsetY = e.clientY - startY;
+
+        element.style.top = element.offsetTop + offsetY + "px";
+        element.style.left = element.offsetLeft + offsetX + "px";
+
+        startX = e.clientX;
+        startY = e.clientY;
+    };
+
+    const mouseUpHandler = () => {
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
+    };
+
+    element.addEventListener("mousedown", mouseDownHandler);
+};
+
 function createDurationBanner(formatted, videoCount) {
     if (document.getElementById("yt-duration-banner")) {
         document.getElementById("yt-duration-banner").remove();
@@ -42,7 +76,7 @@ function formatDuration(totalSeconds) {
 
 function calculateTotalDuration() {
     const durationElements = document.querySelectorAll(
-        ".badge-shape-wiz__text"
+        "#text.style-scope.ytd-thumbnail-overlay-time-status-renderer"
     );
 
     let total = 0;
@@ -60,6 +94,36 @@ function calculateTotalDuration() {
     createDurationBanner(formatted, durationElements.length);
 }
 
-window.addEventListener("load", () => {
-    setTimeout(calculateTotalDuration, 3000); // Delay for page to fully load
+// Auto scrolls to the bottom to load all videos
+async function scrollToLoadAllVideos() {
+    return new Promise((resolve) => {
+        let lastScrollTop = -1;
+        let sameCount = 0;
+
+        const interval = setInterval(() => {
+            window.scrollBy(0, 1000); // scroll down
+
+            const scrollTop =
+                document.documentElement.scrollTop || document.body.scrollTop;
+            if (scrollTop === lastScrollTop) {
+                sameCount++;
+            } else {
+                sameCount = 0;
+                lastScrollTop = scrollTop;
+            }
+
+            if (sameCount > 10) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 500);
+    });
+}
+
+window.addEventListener("load", async () => {
+    await scrollToLoadAllVideos();
+    setTimeout(calculateTotalDuration, 1000); // Delay for page to fully load
+    setTimeout(() => {
+        dragElement(document.getElementById("yt-duration-banner"));
+    }, 3000); // Delay for page to fully load
 });
